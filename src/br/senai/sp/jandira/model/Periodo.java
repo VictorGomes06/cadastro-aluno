@@ -5,7 +5,9 @@ public enum Periodo {
 	MANHA("Manhã"),
 	TARDE("Tarde"),
 	NOITE("Noite"),
-	SABADO("Sábado");
+	SABADO("Sábado"),
+	ONLINE("On-line");
+	
 	
 	private String descricao;
 	
