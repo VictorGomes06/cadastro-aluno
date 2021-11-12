@@ -8,12 +8,15 @@ import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 
@@ -21,6 +24,7 @@ import br.senai.sp.jandira.Repository.AlunoRepository;
 import br.senai.sp.jandira.model.Aluno;
 import br.senai.sp.jandira.model.Periodo;
 
+import javax.management.ListenerNotFoundException;
 import javax.swing.AbstractButton;
 import javax.swing.AbstractListModel;
 
@@ -65,16 +69,16 @@ public class FrameCadastroAlunos extends JFrame {
 		lblperiodo.setBounds(10, 87, 46, 14);
 		contentPane.add(lblperiodo);
 
-		DefaultComboBoxModel<String> comboModelPerido = new DefaultComboBoxModel<String>();
+		DefaultComboBoxModel<String> ModelPeriodo = new DefaultComboBoxModel<String>();
 		for (Periodo periodo : Periodo.values()) {
 
-			comboModelPerido.addElement(periodo.getDescricao());
+			ModelPeriodo.addElement(periodo.getDescricao());
 
 		}
 
 		JComboBox comboPeriodo = new JComboBox();
 
-		comboPeriodo.setModel(comboModelPerido);
+		comboPeriodo.setModel(ModelPeriodo);
 		comboPeriodo.setBounds(66, 83, 86, 22);
 		contentPane.add(comboPeriodo);
 
@@ -101,9 +105,21 @@ public class FrameCadastroAlunos extends JFrame {
 
 		AlunoRepository turma = new AlunoRepository(3);
 
-		
-		
 
+		
+		listAlunos.addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				
+				Aluno aluno = turma.listarAluno(listAlunos.getSelectedIndex());
+				txtmatricula.setText(aluno.getMatricula());
+				txtNome.setText(aluno.getNome());
+				
+				comboPeriodo.setSelectedIndex(aluno.getPeriodo().ordinal());
+			}
+		});
+		
 		btnsalvar.addActionListener(new ActionListener() {
 
 			@Override
@@ -112,16 +128,51 @@ public class FrameCadastroAlunos extends JFrame {
 				Aluno aluno = new Aluno();
 				aluno.setNome(txtNome.getText());
 				aluno.setMatricula(txtmatricula.getText());
-
+				
+				aluno.setPeriodo(determinarPeriodo(comboPeriodo.getSelectedIndex()));
+				
 				turma.gravar(aluno, posicao);
 
 				posicao++; 
 
+				if (posicao == turma.getTamanho()) {
+					btnsalvar.setEnabled(false);
+					JOptionPane.showConfirmDialog(null," A turma está cheia","cheia !", JOptionPane.WARNING_MESSAGE);
+				}
 				
 				modelAlunos.addElement(aluno.getNome());
 
 			}
 		});
-
 	}
+		
+	
+
+		private Periodo determinarPeriodo(int periodoSelecionado){
+			
+		
+			
+			if (periodoSelecionado == 0) {
+				return Periodo.MANHA;
+			}
+			else if (periodoSelecionado == 1) {
+				return Periodo.TARDE;
+			}
+			else if (periodoSelecionado == 2) {
+				return Periodo.NOITE;
+			}
+			else if (periodoSelecionado == 3) {
+				return Periodo.SABADO;
+			}
+			else {
+				return Periodo.ONLINE;
+			}
+			
+			
+		}                                                                                                 
+	 
+		
+		
+		
+	
 }
